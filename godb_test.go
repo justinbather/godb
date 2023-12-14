@@ -13,12 +13,11 @@ func TestCreateDB(t *testing.T) {
 }
 
 func TestCreateTable(t *testing.T) {
-	table = db.CreateTable("test table")
+	table = db.CreateTable("test table", []Column{{"col1", "int"}, {"col2", "char"}})
+	table.ListColumns()
 	db.ListTables()
 }
 
-func TestCreateCol(t *testing.T) {
-
-	table.AppendColumn("Test Column", "int")
-	table.ListColumns()
+func TestInsertRow(t *testing.T) {
+	table.Insert([]Row{"hello", "1"})
 }
