@@ -19,7 +19,7 @@ func New() *Store {
 	return store
 }
 
-func (s *Store) Get(key string) (any, error) {
+func (s *Store) Get(key string) (interface{}, error) {
 
 	// Prevents concurrent read/writes
 	// Only Allows concurrent reads
@@ -36,17 +36,17 @@ func (s *Store) Get(key string) (any, error) {
 	return val, nil
 }
 
-func (s *Store) Set(key string, value any) {
+func (s *Store) Set(key string, value interface{}) {
 
 	s.mu.Lock()
-	s.mu.Unlock()
+	defer s.mu.Unlock()
 
 	s.Data[key] = value
 }
 
 func (s *Store) Delete(key string) {
 	s.mu.Lock()
-	s.mu.Unlock()
+	defer s.mu.Unlock()
 
 	delete(s.Data, key)
 }

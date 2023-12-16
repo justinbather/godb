@@ -1,6 +1,7 @@
 package keyvalstore
 
 import (
+	"sync"
 	"testing"
 )
 
@@ -44,4 +45,29 @@ func TestDelete(t *testing.T) {
 		t.Fatalf("Error deleting value, key:foo still has a value")
 	}
 
+}
+
+// Tests the mutex locks in Store
+func TestConcurrency(t *testing.T) {
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go write(&wg)
+	go read(&wg)
+
+	//Wait to exit function once both routines have completed
+	wg.Wait()
+}
+
+func write(wg *sync.WaitGroup) {
+	defer wg.Done()
+	for i := 0; i < 100; i++ {
+		testStore.Set("foo", i)
+	}
+}
+
+func read(wg *sync.WaitGroup) {
+	defer wg.Done()
+	for i := 0; i < 100; i++ {
+		testStore.Get("foo")
+	}
 }
