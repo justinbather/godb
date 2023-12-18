@@ -1,5 +1,8 @@
 # GoDB - Key/Value In-Memory Database Implementation
 
+An In-Memory K/V(Key/Value) store database implementation with TTL and Optional Sliding TTL windows built in Go. Based on a Map, this library allows you to easily cache data without needing to worry about
+any underlying logic.
+
 ## Usage
 
 Library can be required by using:
@@ -22,19 +25,21 @@ func main() {
 
   /*
    * Set a value in your database
-   * @params: key string, value any (interface{})
+   * @params: key string, value any (interface{}), ttl time.Duration, sliding bool
    */
-  db.Set("foo", "bar")
+  db.Set("foo", "bar", 5*time.Minutes, true)
+  // GoDB will take the given TTL duration and have a worker thread remove the entry automatically once the TTL value has elapsed
+  // If sliding is set to true for this value, the window will be extended by the TTL value whenever the KV pair is accessed
 
   /* 
-   * Get a value from your database
+   * Get a value from your database. If sliding is true for this kv pair, the expiration time will be moved forward by the same duration initially given
    * @params: key string
    * @returns: value any, ok bool 
    */
-  value, ok := db.Get("foo")
+  value, err := db.Get("foo")
 
-  if !ok {
-    log.Fatal("Error: value not found at key 'foo'")
+  if err != nil {
+    log.Fatal(err)
   }
 
   fmt.Printf("value: %s", value)
@@ -49,7 +54,8 @@ func main() {
 
 ## Todo
 
-- [ ] Add TTL to key/value pairs
-- [ ] Add Sliding TTL 
+- [x] Add TTL to key/value pairs
+- [x] Add Sliding TTL 
+- [ ] Search functionality
 
 
