@@ -4,6 +4,7 @@ import (
 	//"fmt"
 	"sync"
 	"testing"
+	"time"
 )
 
 var testStore *Store = New()
@@ -13,7 +14,7 @@ func TestSet(t *testing.T) {
 	key := "foo"
 	val := "bar"
 
-	testStore.Set(key, val)
+	testStore.Set(key, val, 5*time.Second)
 
 	setVal, ok := testStore.Data[key]
 	if !ok {
@@ -48,6 +49,21 @@ func TestDelete(t *testing.T) {
 
 }
 
+func TestTTL(t *testing.T) {
+	// Set value with 5 second expiration
+	testStore.Set("ttl", "baz", 5*time.Second)
+	//Sleep for 6 seconds, we should be able to get the value after the sleep
+
+	time.Sleep(6 * time.Second)
+
+	_, err := testStore.Get("ttl")
+
+	// This should return an error if test passes, we expect no value to be found
+	if err == nil {
+		t.Fatal("Error running TTL test, expected no value but found value after ttl duration")
+	}
+}
+
 // Tests the mutex locks in Store
 func TestConcurrency(t *testing.T) {
 	var wg sync.WaitGroup
@@ -62,7 +78,7 @@ func TestConcurrency(t *testing.T) {
 func write(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for i := 0; i < 100; i++ {
-		testStore.Set("foo", i)
+		testStore.Set("foo", i, 5*time.Second)
 	}
 }
 

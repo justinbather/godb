@@ -11,7 +11,7 @@ import (
 
 type item struct {
 	value      interface{}
-	expiration time.Duration
+	expiration time.Time
 }
 
 type Store struct {
@@ -43,14 +43,18 @@ func (s *Store) Get(key string) (interface{}, error) {
 	return val.value, nil
 }
 
-func (s *Store) Set(key string, value interface{}) {
+func (s *Store) Set(key string, value interface{}, ttl time.Duration) {
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	item := &item{value: value}
+	expires := time.Now().Add(ttl)
+
+	item := &item{value: value, expiration: expires}
 
 	s.Data[key] = item
+
+	go s.scheduleRemoval(key, ttl)
 }
 
 func (s *Store) Delete(key string) {
@@ -58,4 +62,9 @@ func (s *Store) Delete(key string) {
 	defer s.mu.Unlock()
 
 	delete(s.Data, key)
+}
+
+func (s *Store) scheduleRemoval(key string, ttl time.Duration) {
+	<-time.After(ttl)
+	s.Delete(key)
 }
