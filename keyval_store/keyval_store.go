@@ -12,6 +12,8 @@ import (
 type item struct {
 	value      interface{}
 	expiration time.Time
+	sliding    bool
+	ttl        time.Duration
 }
 
 type Store struct {
@@ -40,20 +42,26 @@ func (s *Store) Get(key string) (interface{}, error) {
 		return nil, err
 	}
 
+	// If sliding enabled we need to move the expiration up
+	if val.sliding {
+		val.expiration = time.Now().Add(val.ttl)
+	}
+
 	return val.value, nil
 }
 
-func (s *Store) Set(key string, value interface{}, ttl time.Duration) {
+func (s *Store) Set(key string, value interface{}, ttl time.Duration, slide bool) {
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	expires := time.Now().Add(ttl)
 
-	item := &item{value: value, expiration: expires}
+	item := &item{value: value, expiration: expires, ttl: ttl, sliding: slide}
 
 	s.Data[key] = item
 
+	// Run a task on another thread that will remove this value once time.Now() > expiration
 	go s.scheduleRemoval(key, ttl)
 }
 
@@ -65,6 +73,7 @@ func (s *Store) Delete(key string) {
 }
 
 func (s *Store) scheduleRemoval(key string, ttl time.Duration) {
+	// Waits until current time is after the ttl duration
 	<-time.After(ttl)
 	s.Delete(key)
 }
