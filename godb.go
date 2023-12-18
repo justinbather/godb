@@ -1,6 +1,4 @@
-package keyvalstore
-
-// Implements a Key-Value based In-Memory Database
+package godb
 
 import (
 	"errors"

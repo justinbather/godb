@@ -1,4 +1,4 @@
-package keyvalstore
+package godb
 
 import (
 	//"fmt"
