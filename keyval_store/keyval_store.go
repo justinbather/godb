@@ -4,17 +4,24 @@ package keyvalstore
 
 import (
 	"errors"
+	//"fmt"
 	"sync"
+	"time"
 )
+
+type item struct {
+	value      interface{}
+	expiration time.Duration
+}
 
 type Store struct {
 	mu   sync.RWMutex
-	Data map[string]interface{}
+	Data map[string]*item
 }
 
 func New() *Store {
 	store := &Store{
-		Data: make(map[string]interface{}),
+		Data: make(map[string]*item),
 	}
 	return store
 }
@@ -33,7 +40,7 @@ func (s *Store) Get(key string) (interface{}, error) {
 		return nil, err
 	}
 
-	return val, nil
+	return val.value, nil
 }
 
 func (s *Store) Set(key string, value interface{}) {
@@ -41,7 +48,9 @@ func (s *Store) Set(key string, value interface{}) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.Data[key] = value
+	item := &item{value: value}
+
+	s.Data[key] = item
 }
 
 func (s *Store) Delete(key string) {

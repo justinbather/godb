@@ -1,6 +1,7 @@
 package keyvalstore
 
 import (
+	//"fmt"
 	"sync"
 	"testing"
 )
@@ -19,8 +20,8 @@ func TestSet(t *testing.T) {
 		t.Fatalf("Value did not set, expected %s", val)
 	}
 
-	if setVal != val {
-		t.Fatalf("Value set incorrectly, expected %s but got %s", val, setVal)
+	if setVal.value != val {
+		t.Fatalf("Value set incorrectly, expected %s but got %s", val, setVal.value)
 	}
 }
 
