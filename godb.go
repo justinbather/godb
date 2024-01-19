@@ -2,10 +2,12 @@ package godb
 
 import (
 	"errors"
-	//"fmt"
 	"sync"
 	"time"
 )
+
+// GoDB is an in-memory key/value store database with a simple API that enables a time-to-live for a stored value aswell.
+// Not meant to be fast or anything as good as Redis or something similar, just a fun project to do on the side
 
 type item struct {
 	value      interface{}
