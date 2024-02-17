@@ -14,14 +14,14 @@ go get github.com/justinbather/godb@latest
 package main
 
 import (
-  "github.com/justinbather/godb/keyval_store"
+  "github.com/justinbather/godb/"
   "log"
   "fmt"
 )
 
 func main() {
   // Instantiate the db
-  db := keyval_store.New()
+  db := godb.New()
 
   /*
    * Set a value in your database
