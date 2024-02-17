@@ -4,6 +4,8 @@ import (
 	"errors"
 	"sync"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // GoDB is an in-memory key/value store database with a simple API that enables a time-to-live for a
@@ -23,6 +25,7 @@ type Store struct {
 }
 
 func New() *Store {
+	log.Debug("creating new store")
 	store := &Store{
 		Data: make(map[string]*item),
 	}

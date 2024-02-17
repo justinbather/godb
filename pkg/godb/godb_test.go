@@ -1,10 +1,11 @@
 package godb
 
 import (
-	"log"
 	"sync"
 	"testing"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func write(wg *sync.WaitGroup, store *Store) {
