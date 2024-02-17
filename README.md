@@ -1,3 +1,5 @@
+![godb](./media/brand.png)
+
 # GoDB - Key/Value In-Memory Database Implementation
 
 An In-Memory K/V(Key/Value) store database implementation with TTL and Optional Sliding TTL windows built in Go. Based on a Map, this library allows you to easily cache data without needing to worry about
@@ -64,3 +66,4 @@ func main() {
 - [ ] Search functionality
 
 
+![logo](./media/logo.png)
