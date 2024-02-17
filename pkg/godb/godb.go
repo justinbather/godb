@@ -13,7 +13,7 @@ import (
 // a fun project to do on the side
 
 type item struct {
-	value      interface{}
+	Value      interface{}
 	expiration time.Time
 	sliding    bool
 	ttl        time.Duration
@@ -50,7 +50,7 @@ func (s *Store) Get(key string) (interface{}, error) {
 		val.expiration = time.Now().Add(val.ttl)
 	}
 
-	return val.value, nil
+	return val.Value, nil
 }
 
 func (s *Store) Set(key string, value interface{}, ttl time.Duration, slide bool) {
@@ -59,7 +59,7 @@ func (s *Store) Set(key string, value interface{}, ttl time.Duration, slide bool
 
 	expires := time.Now().Add(ttl)
 
-	item := &item{value: value, expiration: expires, ttl: ttl, sliding: slide}
+	item := &item{Value: value, expiration: expires, ttl: ttl, sliding: slide}
 
 	s.Data[key] = item
 
