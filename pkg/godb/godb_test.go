@@ -1,21 +1,23 @@
-package godb
+package godb_test
 
 import (
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/justinbather/godb/pkg/godb"
+
 	log "github.com/sirupsen/logrus"
 )
 
-func write(wg *sync.WaitGroup, store *Store) {
+func write(wg *sync.WaitGroup, store *godb.Store) {
 	defer wg.Done()
 	for i := 0; i < 100; i++ {
 		store.Set("foo", i, 5*time.Second, false)
 	}
 }
 
-func read(wg *sync.WaitGroup, store *Store) error {
+func read(wg *sync.WaitGroup, store *godb.Store) error {
 	defer wg.Done()
 	for i := 0; i < 100; i++ {
 		if _, err := store.Get("foo"); err != nil {
@@ -26,7 +28,7 @@ func read(wg *sync.WaitGroup, store *Store) error {
 }
 
 func TestSmoketests(t *testing.T) {
-	testStore := New()
+	testStore := godb.New()
 
 	t.Run("set", func(t *testing.T) {
 		key := "foo"
@@ -39,8 +41,8 @@ func TestSmoketests(t *testing.T) {
 			t.Fatalf("Value did not set, expected %s", val)
 		}
 
-		if setVal.value != val {
-			t.Fatalf("Value set incorrectly, expected %s but got %s", val, setVal.value)
+		if setVal.Value != val {
+			t.Fatalf("Value set incorrectly, expected %s but got %s", val, setVal.Value)
 		}
 	})
 
@@ -101,7 +103,7 @@ func TestSmoketests(t *testing.T) {
 
 // Tests the mutex locks in Store.
 func TestConcurrency(_ *testing.T) {
-	testStore := New()
+	testStore := godb.New()
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go write(&wg, testStore)
