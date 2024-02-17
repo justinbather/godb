@@ -14,9 +14,14 @@ go get github.com/justinbather/godb@latest
 package main
 
 import (
-  "github.com/justinbather/godb/"
   "log"
-  "fmt"
+  "time"
+
+  "github.com/justinbather/godb/pkg/godb"
+)
+
+const (
+	ttl = 5 * time.Minute
 )
 
 func main() {
@@ -27,7 +32,7 @@ func main() {
    * Set a value in your database
    * @params: key string, value any (interface{}), ttl time.Duration, sliding bool
    */
-  db.Set("foo", "bar", 5*time.Minutes, true)
+  db.Set("foo", "bar", ttl, true)
   // GoDB will take the given TTL duration and have a worker thread remove the entry automatically once the TTL value has elapsed
   // If sliding is set to true for this value, the window will be extended by the TTL value whenever the KV pair is accessed
 
@@ -42,7 +47,7 @@ func main() {
     log.Fatal(err)
   }
 
-  fmt.Printf("value: %s", value)
+  log.Printf("value: %s", value)
 
   /*
    * Remove a key/value pair from the database

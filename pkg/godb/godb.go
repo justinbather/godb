@@ -4,10 +4,13 @@ import (
 	"errors"
 	"sync"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
-// GoDB is an in-memory key/value store database with a simple API that enables a time-to-live for a stored value aswell.
-// Not meant to be fast or anything as good as Redis or something similar, just a fun project to do on the side
+// GoDB is an in-memory key/value store database with a simple API that enables a time-to-live for a
+// stored value aswell. Not meant to be fast or anything as good as Redis or something similar, just
+// a fun project to do on the side
 
 type item struct {
 	value      interface{}
@@ -22,6 +25,7 @@ type Store struct {
 }
 
 func New() *Store {
+	log.Debug("creating new store")
 	store := &Store{
 		Data: make(map[string]*item),
 	}
@@ -29,7 +33,6 @@ func New() *Store {
 }
 
 func (s *Store) Get(key string) (interface{}, error) {
-
 	// Prevents concurrent read/writes
 	// Only Allows concurrent reads
 	s.mu.Lock()
@@ -38,7 +41,7 @@ func (s *Store) Get(key string) (interface{}, error) {
 
 	val, ok := s.Data[key]
 	if !ok {
-		err := errors.New("Error: No Key-Value pair found with key")
+		err := errors.New("no Key-Value pair found with key")
 		return nil, err
 	}
 
@@ -51,7 +54,6 @@ func (s *Store) Get(key string) (interface{}, error) {
 }
 
 func (s *Store) Set(key string, value interface{}, ttl time.Duration, slide bool) {
-
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
