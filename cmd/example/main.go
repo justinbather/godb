@@ -5,6 +5,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"github.com/justinbather/godb/pkg/client"
 	"github.com/justinbather/godb/pkg/godb"
 )
 
@@ -42,4 +43,6 @@ func main() {
 	 * @Params: key string
 	 */
 	db.Delete("foo")
+
+	client.TestClient()
 }
