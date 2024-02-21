@@ -26,7 +26,6 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 
 	var req requestItem
 	err := json.NewDecoder(r.Body).Decode(&req)
-	//fmt.Println(req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
