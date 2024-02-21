@@ -18,7 +18,7 @@ var db *godb.Store = godb.New()
 type requestItem struct {
 	Value   interface{} `json:"value"`
 	Key     string      `json:"key"`
-	Ttl     int         `json:"ttl"`
+	TTL     int         `json:"ttl"`
 	Sliding bool        `json:"sliding"`
 }
 
@@ -29,10 +29,8 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
-
 	// Set the header to json
 	w.Header().Set("Content-Type", "application/json")
-
 	switch r.Method {
 	case "GET":
 		key := r.URL.Query().Get("key")
@@ -44,13 +42,12 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(data)
 	case "POST":
 		//convert ttl to seconds
-		err := db.Set(req.Key, req.Value, time.Duration(req.Ttl)*1000000000, req.Sliding)
+		err := db.Set(req.Key, req.Value, time.Duration(req.TTL)*1000000000, req.Sliding)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
-		} else {
-			w.WriteHeader(http.StatusCreated)
 		}
+		w.WriteHeader(http.StatusCreated)
 	case "DELETE":
 		db.Delete(req.Key)
 		w.WriteHeader(http.StatusNoContent)
@@ -60,7 +57,6 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
 	r := mux.NewRouter()
 	r.HandleFunc("/", handleRequest).Methods("GET", "POST", "PUT", "DELETE")
 	log.Print("Server started on port 8080")

@@ -2,7 +2,6 @@ package godb
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 
@@ -34,7 +33,6 @@ func New() *Store {
 }
 
 func (s *Store) Get(key string) (interface{}, error) {
-	fmt.Println(key)
 	// Prevents concurrent read/writes
 	// Only Allows concurrent reads
 	s.mu.Lock()
@@ -56,7 +54,6 @@ func (s *Store) Get(key string) (interface{}, error) {
 }
 
 func (s *Store) Set(key string, value interface{}, ttl time.Duration, slide bool) error {
-	fmt.Println(ttl)
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -79,7 +76,6 @@ func (s *Store) GetKeys() []string {
 	for k := range s.Data {
 		keys = append(keys, k)
 	}
-	fmt.Println(keys)
 	return keys
 }
 
