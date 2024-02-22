@@ -53,7 +53,7 @@ func (s *Store) Get(key string) (interface{}, error) {
 	return val.Value, nil
 }
 
-func (s *Store) Set(key string, value interface{}, ttl time.Duration, slide bool) error {
+func (s *Store) Set(key string, value interface{}, ttl time.Duration, slide bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -65,7 +65,6 @@ func (s *Store) Set(key string, value interface{}, ttl time.Duration, slide bool
 
 	// Run a task on another thread that will remove this value once time.Now() > expiration
 	go s.scheduleRemoval(key, ttl)
-	return nil
 }
 
 func (s *Store) GetKeys() []string {
