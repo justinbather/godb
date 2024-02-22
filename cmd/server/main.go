@@ -23,7 +23,6 @@ type requestItem struct {
 }
 
 func handleRequest(w http.ResponseWriter, r *http.Request) {
-
 	var req requestItem
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -42,7 +41,7 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(data)
 	case "POST":
 		//convert ttl to seconds
-		err := db.Set(req.Key, req.Value, time.Duration(req.TTL)*1000000000, req.Sliding)
+		db.Set(req.Key, req.Value, time.Duration(req.TTL)*1000000000, req.Sliding)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
