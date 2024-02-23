@@ -15,6 +15,8 @@ import (
 
 var db *godb.Store = godb.New()
 
+const toSeconds = 1000000000
+
 type requestItem struct {
 	Value   interface{} `json:"value"`
 	Key     string      `json:"key"`
@@ -38,10 +40,15 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
-		json.NewEncoder(w).Encode(data)
+		err = json.NewEncoder(w).Encode(data)
+		if err != nil {
+			log.Fatal(err)
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
 	case "POST":
-		//convert ttl to seconds
-		db.Set(req.Key, req.Value, time.Duration(req.TTL)*1000000000, req.Sliding)
+		// convert ttl to seconds
+		db.Set(req.Key, req.Value, time.Duration(req.TTL)*toSeconds, req.Sliding)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -57,7 +64,10 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/", handleRequest).Methods("GET", "POST", "PUT", "DELETE")
+	r.HandleFunc("/", handleRequest).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
 	log.Print("Server started on port 8080")
-	http.ListenAndServe(":8080", r)
+	err := http.ListenAndServe(":8080", r)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
