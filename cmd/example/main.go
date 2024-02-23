@@ -42,5 +42,4 @@ func main() {
 	 * @Params: key string
 	 */
 	db.Delete("foo")
-
 }

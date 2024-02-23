@@ -13,9 +13,10 @@ import (
 // when a user runs this binary we should launch a server with a port expoesd
 // so the user can send requests to this and we manage the godb instance
 
-var db *godb.Store = godb.New()
-
-const toSeconds = 1000000000
+const (
+	toSeconds     = 1000000000
+	serverTimeout = 10 * time.Second
+)
 
 type requestItem struct {
 	Value   interface{} `json:"value"`
@@ -24,49 +25,58 @@ type requestItem struct {
 	Sliding bool        `json:"sliding"`
 }
 
-func handleRequest(w http.ResponseWriter, r *http.Request) {
-	var req requestItem
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	}
-	// Set the header to json
-	w.Header().Set("Content-Type", "application/json")
-	switch r.Method {
-	case "GET":
-		key := r.URL.Query().Get("key")
-		data, err := db.Get(key)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusNotFound)
-			return
-		}
-		err = json.NewEncoder(w).Encode(data)
-		if err != nil {
-			log.Fatal(err)
-			http.Error(w, err.Error(), http.StatusNotFound)
-			return
-		}
-	case "POST":
-		// convert ttl to seconds
-		db.Set(req.Key, req.Value, time.Duration(req.TTL)*toSeconds, req.Sliding)
+func handleRequest(db *godb.Store) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req requestItem
+		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		w.WriteHeader(http.StatusCreated)
-	case "DELETE":
-		db.Delete(req.Key)
-		w.WriteHeader(http.StatusNoContent)
-	default:
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		// Set the header to json
+		w.Header().Set("Content-Type", "application/json")
+		switch r.Method {
+		case http.MethodGet:
+			key := r.URL.Query().Get("key")
+			data, getErr := db.Get(key)
+			if getErr != nil {
+				http.Error(w, getErr.Error(), http.StatusNotFound)
+				log.Fatal(getErr)
+				return
+			}
+			err = json.NewEncoder(w).Encode(data)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusNotFound)
+				log.Fatal(err)
+				return
+			}
+		case http.MethodPost:
+			// convert ttl to seconds
+			db.Set(req.Key, req.Value, time.Duration(req.TTL)*toSeconds, req.Sliding)
+			w.WriteHeader(http.StatusCreated)
+		case http.MethodDelete:
+			db.Delete(req.Key)
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
 	}
 }
 
 func main() {
+	db := godb.New()
 	r := mux.NewRouter()
-	r.HandleFunc("/", handleRequest).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
+	r.HandleFunc("/", handleRequest(db)).Methods("GET", "POST", "DELETE")
 	log.Print("Server started on port 8080")
-	err := http.ListenAndServe(":8080", r)
+
+	server := http.Server{
+		Addr:         ":8080",
+		Handler:      r,
+		ReadTimeout:  serverTimeout,
+		WriteTimeout: serverTimeout,
+	}
+
+	err := server.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
 	}
