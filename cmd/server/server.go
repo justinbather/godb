@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -21,15 +23,20 @@ func main() {
 	db := godb.New()
 	r := mux.NewRouter()
 	r.HandleFunc("/", server.HandleRequest(db)).Methods("GET", "POST", "DELETE")
-	log.Print("Server started on port 8080")
+
+	// NOTE: need to move this into a cli.go file? need to create a config struct
+	portFlag := flag.String("port", "8080", "server port")
+
+	flag.Parse()
 
 	server := http.Server{
-		Addr:         ":8080",
+		Addr:         fmt.Sprintf(":%s", *portFlag),
 		Handler:      r,
 		ReadTimeout:  serverTimeout,
 		WriteTimeout: serverTimeout,
 	}
 
+	log.Printf(fmt.Sprintf("Server started on port %s", *portFlag))
 	err := server.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
