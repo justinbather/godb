@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"github.com/justinbather/godb/internal/types"
 	"github.com/justinbather/godb/pkg/godb"
 	"log"
 	"net/http"
@@ -10,12 +9,13 @@ import (
 )
 
 const (
+	// Conversion from micro-seconds to seconds
 	toSeconds = 1000000000
 )
 
 func HandleRequest(db *godb.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.RequestItem
+		var req requestItem
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)

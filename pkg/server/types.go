@@ -1,6 +1,6 @@
-package types
+package server
 
-type RequestItem struct {
+type requestItem struct {
 	Value   interface{} `json:"value"`
 	Key     string      `json:"key"`
 	TTL     int         `json:"ttl"`
