@@ -67,6 +67,17 @@ func (s *Store) Set(key string, value interface{}, ttl time.Duration, slide bool
 	go s.scheduleRemoval(key, ttl)
 }
 
+func (s *Store) GetKeys() []string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	keys := make([]string, 0, len(s.Data)) // Initialize keys slice with capacity
+	for k := range s.Data {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
 func (s *Store) Delete(key string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
