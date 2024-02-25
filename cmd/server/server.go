@@ -1,22 +1,16 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/justinbather/godb/pkg/godb"
+
 	"github.com/justinbather/godb/pkg/server"
-)
 
-// when a user runs this binary we should launch a server with a port expoesd
-// so the user can send requests to this and we manage the godb instance
-
-const (
-	serverTimeout = 10 * time.Second
+	"github.com/justinbather/godb/pkg/godb"
 )
 
 func main() {
@@ -25,18 +19,17 @@ func main() {
 	r.HandleFunc("/", server.HandleRequest(db)).Methods("GET", "POST", "DELETE")
 
 	// NOTE: need to move this into a cli.go file? need to create a config struct
-	portFlag := flag.String("port", "8080", "server port")
 
-	flag.Parse()
+	config := server.ConfigFromFlags()
 
 	server := http.Server{
-		Addr:         fmt.Sprintf(":%s", *portFlag),
+		Addr:         fmt.Sprintf(":%s", config.Port),
 		Handler:      r,
-		ReadTimeout:  serverTimeout,
-		WriteTimeout: serverTimeout,
+		ReadTimeout:  time.Duration(config.ReadTimeout * int(time.Second)),
+		WriteTimeout: time.Duration(config.WriteTimeout * int(time.Second)),
 	}
 
-	log.Printf(fmt.Sprintf("Server started on port %s", *portFlag))
+	log.Printf("Server started on port %s", config.Port)
 	err := server.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)

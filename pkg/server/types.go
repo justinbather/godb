@@ -6,3 +6,9 @@ type requestItem struct {
 	TTL     int         `json:"ttl"`
 	Sliding bool        `json:"sliding"`
 }
+
+type Config struct {
+	Port         string
+	ReadTimeout  int
+	WriteTimeout int
+}

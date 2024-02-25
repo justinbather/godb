@@ -2,14 +2,15 @@ package server
 
 import (
 	"encoding/json"
-	"github.com/justinbather/godb/pkg/godb"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/justinbather/godb/pkg/godb"
 )
 
 const (
-	// Conversion from micro-seconds to seconds
+	// Conversion from micro-seconds to seconds.
 	toSeconds = 1000000000
 )
 
