@@ -8,7 +8,7 @@ RUN go mod tidy
 
 # build
 COPY . /src
-RUN make godb
+RUN make server
 
 FROM gcr.io/distroless/static-debian12:nonroot
 COPY --from=build /src/bin/example /example
