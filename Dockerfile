@@ -11,5 +11,5 @@ COPY . /src
 RUN make server
 
 FROM gcr.io/distroless/static-debian12:nonroot
-COPY --from=build /src/bin/example /example
-CMD ["/example"]
+COPY --from=build /src/bin/server /server
+CMD ["/server"]
