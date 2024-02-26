@@ -30,7 +30,6 @@ docker-push:
 
 .PHONY: server
 server:
+	mkdir -p $(BIN_DIR)
 	go mod tidy
-	cd cmd/server
-	go build
-	./server
+	CGO_ENABLED=0 go build -o $(BIN_DIR)/server ./cmd/server
