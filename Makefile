@@ -27,3 +27,10 @@ docker-run:
 .PHONY: docker-push
 docker-push:
 	docker push $(DOCKER_IMG):$(TAG)
+
+.PHONY: server
+server:
+	go mod tidy
+	cd cmd/server
+	go build
+	./server
