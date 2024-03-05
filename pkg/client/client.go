@@ -11,6 +11,7 @@ func Get(cfg *Config, key string) (interface{}, error) {
 		return nil, err
 	}
 	// Need to figure out how we can give back the correct types as they are stored instead of a string
+	// Maybe we take an interface as an argument then marshal the json to that interface?
 
 	return nil, nil
 }
