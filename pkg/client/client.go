@@ -1,10 +1,16 @@
 package client
 
 import (
+	"fmt"
 	"net/http"
 )
 
 func Get(cfg *Config, key string) (interface{}, error) {
+	_, err := http.Get(fmt.Sprintf("%s/key=%s", cfg.Address, key))
+	if err != nil {
+		return nil, err
+	}
+	// Need to figure out how we can give back the correct types as they are stored instead of a string
 
 	return nil, nil
 }
