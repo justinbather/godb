@@ -16,38 +16,43 @@ const (
 
 func HandleRequest(db *godb.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req requestItem
-		err := json.NewDecoder(r.Body).Decode(&req)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+
 		// Set the header to json
 		w.Header().Set("Content-Type", "application/json")
 
 		switch r.Method {
 		case http.MethodGet:
 			key := r.URL.Query().Get("key")
+
+			log.Println("key: ", key)
+
 			data, getErr := db.Get(key)
 			if getErr != nil {
 				http.Error(w, getErr.Error(), http.StatusNoContent)
-				return
 			}
-			err = json.NewEncoder(w).Encode(data)
+
+			log.Println("Fetched value: ", data)
+
+			err := json.NewEncoder(w).Encode(data)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
-				log.Fatal(err)
-				return
 			}
-			w.WriteHeader(http.StatusOK)
 
 		case http.MethodPost:
+			var req requestItem
+
+			err := json.NewDecoder(r.Body).Decode(&req)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+			}
+
 			// convert ttl to seconds
 			db.Set(req.Key, req.Value, time.Duration(req.TTL)*toSeconds, req.Sliding)
 			w.WriteHeader(http.StatusCreated)
 
 		case http.MethodDelete:
-			db.Delete(req.Key)
+			key := r.URL.Query().Get("key")
+			db.Delete(key)
 			w.WriteHeader(http.StatusNoContent)
 		default:
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 )
@@ -21,19 +21,19 @@ func Get(cfg *Config, key string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	defer resp.Body.Close()
 	// Need to figure out how we can give back the correct types as they are stored instead of a string
 	// Maybe we take an interface as an argument then marshal the json to that interface?
 
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
 
 	fmt.Println(string(body))
 
-	return "", nil
+	return string(body), nil
 }
 
 func Set(cfg *Config, key string, val string, ttl int, sliding bool) error {
