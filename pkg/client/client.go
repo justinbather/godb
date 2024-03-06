@@ -2,11 +2,13 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"time"
 )
 
 type requestItem struct {
@@ -17,7 +19,17 @@ type requestItem struct {
 }
 
 func Get(cfg *Config, key string) (string, error) {
-	resp, err := http.Get(fmt.Sprintf("%s?key=%s", cfg.Address, key))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(cfg.Timeout))
+	defer cancel()
+
+	client := &http.Client{}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s?key=%s", cfg.Address, key), nil)
+	if err != nil {
+		return "", err
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -31,8 +43,6 @@ func Get(cfg *Config, key string) (string, error) {
 		return "", err
 	}
 
-	fmt.Println(string(body))
-
 	return string(body), nil
 }
 
@@ -44,17 +54,21 @@ func Set(cfg *Config, key string, val string, ttl int, sliding bool) error {
 		Sliding: sliding,
 	}
 
-	payloadJson, err := json.Marshal(payload)
+	payloadJSON, err := json.Marshal(payload)
 	if err != nil {
 		return err
 	}
 
 	client := &http.Client{}
 
-	req, err := http.NewRequest("POST", cfg.Address, bytes.NewBuffer(payloadJson))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(cfg.Timeout))
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, cfg.Address, bytes.NewBuffer(payloadJSON))
 	if err != nil {
 		return err
 	}
+
 	log.Println("Request created")
 
 	req.Header.Set("Content-Type", "application/json")
@@ -63,6 +77,8 @@ func Set(cfg *Config, key string, val string, ttl int, sliding bool) error {
 	if err != nil {
 		return err
 	}
+
+	defer resp.Body.Close()
 
 	log.Println("Made Request to server")
 
@@ -73,19 +89,27 @@ func Set(cfg *Config, key string, val string, ttl int, sliding bool) error {
 	return nil
 }
 
-func Delete(cfg *Config, key string) error {
-
+func Delete(_ *Config, _ string) error {
 	return nil
 }
 
-// User should run this to ensure the config is correct and docker server is running, ready to be used
 func Connect(cfg *Config) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(cfg.Timeout))
+	defer cancel()
 
-	// Just need a simple ping to the server to ensure its running and the users config is correct
-	_, err := http.Get(cfg.Address)
+	client := &http.Client{}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, cfg.Address, nil)
 	if err != nil {
 		return err
 	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
 
 	return nil
 }

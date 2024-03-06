@@ -8,7 +8,6 @@ import (
 
 func HandleRequest(db *godb.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		// Set the header to json
 		w.Header().Set("Content-Type", "application/json")
 

@@ -9,17 +9,15 @@ import (
 )
 
 func TestConnect(t *testing.T) {
-
-	cfg := client.New("http://localhost:8080")
+	cfg := client.New("http://localhost:8080", 10)
 	err := client.Connect(cfg)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal("failed to connect to server")
 	}
-
 }
 
 func TestDb(t *testing.T) {
-	cfg := client.New("http://localhost:8080/")
+	cfg := client.New("http://localhost:8080/", 10)
 
 	err := client.Set(cfg, "hello", "world", 10000, false)
 	if err != nil {
@@ -32,7 +30,6 @@ func TestDb(t *testing.T) {
 	}
 
 	if strings.TrimSpace(val) != `"world"` {
-
 		log.Printf("value: %s, hex: %x", val, []byte(val))
 		log.Printf("expected: %s, hex: %x", "world", []byte("world"))
 		log.Printf("len of val: %d", len(val))
