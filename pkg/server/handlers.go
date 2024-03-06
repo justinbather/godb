@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
@@ -17,14 +16,10 @@ const (
 func GetHandler(w http.ResponseWriter, r *http.Request, db *godb.Store) {
 	key := r.URL.Query().Get("key")
 
-	log.Println("key: ", key)
-
 	data, getErr := db.Get(key)
 	if getErr != nil {
 		http.Error(w, getErr.Error(), http.StatusNoContent)
 	}
-
-	log.Println("Fetched value: ", data)
 
 	err := json.NewEncoder(w).Encode(data)
 	if err != nil {
