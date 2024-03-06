@@ -29,6 +29,10 @@ func TestDb(t *testing.T) {
 		t.Fatalf("Error getting value")
 	}
 
+	if val != "world" {
+		t.Fatalf("Did not get the correct response. Expected 'Hello', got %s", val)
+	}
+
 	log.Println("Success")
 	log.Println("value: ", val)
 }
