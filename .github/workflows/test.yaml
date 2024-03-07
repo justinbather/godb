@@ -18,7 +18,9 @@ jobs:
       run: make godb
 
     - name: Start Server
-      run: go run cmd/server/server.go
+      run: |
+        go run cmd/server/server.go
+        sleep 5
 
     - name: Test
       uses: robherley/go-test-action@v0.1.0
