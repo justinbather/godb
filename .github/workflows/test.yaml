@@ -18,4 +18,6 @@ jobs:
       run: make godb
 
     - name: Test
+      run: go run cmd/server/server.go
       uses: robherley/go-test-action@v0.1.0
+
