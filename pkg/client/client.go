@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -89,7 +90,29 @@ func Set(cfg *Config, key string, val string, ttl int, sliding bool) error {
 	return nil
 }
 
-func Delete(_ *Config, _ string) error {
+func Delete(cfg *Config, key string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(cfg.Timeout))
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, fmt.Sprintf("%s?key=%s", cfg.Address, key), nil)
+	if err != nil {
+		return err
+	}
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent {
+		err = errors.New("value not found")
+		return err
+	}
+
 	return nil
 }
 

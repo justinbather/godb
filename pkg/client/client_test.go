@@ -40,4 +40,9 @@ func TestDb(t *testing.T) {
 
 	log.Println("Success")
 	log.Println("value: ", val)
+
+	err = client.Delete(cfg, "hello")
+	if err != nil {
+		t.Fatalf("Failed deleting key/value pair. Error: %s", err)
+	}
 }
